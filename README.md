@@ -22,7 +22,7 @@ Store and read your password in a encrypted format through system commands
 
 ### Commands
 
-<table>
+<table style="width:100%;">
         <thead>
                 <tr>
                         <th>Command</th>
