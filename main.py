@@ -141,7 +141,7 @@ def add_data(database: Database):
 
     database.commit()
     
-    print("Inserted new data with reference no: {0}".format(info_data.ref))
+    print("\nInserted new data with reference no: {0}".format(info_data.ref))
     sys.exit(0)
     
 def view_data(database: Database, args: argparse.Namespace):
