@@ -9,7 +9,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def arguments():
     parser = argparse.ArgumentParser(
-        description="Store your passwords in a fancy way.", 
+        description="Store and access your passwords in a fancy way.", 
         prog="mypass",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
