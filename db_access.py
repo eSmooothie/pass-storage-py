@@ -1,6 +1,7 @@
 import logging
 import os
 import sqlite3
+import sys
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -55,6 +56,11 @@ class Database:
             WHERE `ref`={ref_no}
         ''')
         res = res.fetchall()
+
+        if len(res) == 0:
+            print(f"No information found in ref#{ref_no}.\nTry `mypass view` or `mypass view -h`")
+            sys.exit(1)
+
         for row in res:
             ref, name, username, password, created_at = row
             info_data = InfoDataModel(
@@ -87,14 +93,14 @@ class Database:
                 print(f"\t{field}: {value}")
         other.close()
 
-    def get_all_info(self, limit:int = 5):
+    def get_all_info(self, limit:int = 5, offset:int=0):
         res = self.__db_cursor.execute(f'''SELECT 
             `ref` AS `reference`,
             `name` AS `site`,
             `username` AS `username`,
             `password` AS `password`,
             `created_at` AS `created_at`
-            FROM `info` LIMIT {limit}
+            FROM `info` LIMIT {limit} OFFSET {offset}
             ''')
         res = res.fetchall()
 
@@ -107,13 +113,12 @@ class Database:
                 password=password,
                 created_at=created_at
                 )
-            print(f"Reference {info_data.ref} - {info_data.created_at}")
+            print(f"Reference {info_data.ref} ({info_data.created_at})")
             print(f"\tname: {info_data.name}")
             print(f"\tusername: {info_data.username}")
-            print(f"\tpassword: {info_data.password}")
-            print(f"\tcreated at: {info_data.created_at}\n")
+            print(f"\tpassword: {info_data.password}\n")
+            
         
-
     def insert_info_data(self, data : InfoDataModel):
         insert_sql = 'INSERT INTO info VALUES (?, ?, ?, ?, ?)'
         self.__db_cursor.execute(insert_sql, data.tuple_format())

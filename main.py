@@ -8,12 +8,13 @@ from db_access import Database, InfoDataModel
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-def tool_arguments():
+def arguments():
     parser = argparse.ArgumentParser(
         description="Store your passwords in a fancy way.", 
         prog="mypass",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
+
     sub_parser = parser.add_subparsers(
         dest="cmd", 
         help="Actions",
@@ -21,22 +22,43 @@ def tool_arguments():
     
     add_parser = sub_parser.add_parser("add", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     view_parser = sub_parser.add_parser("view", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    search_parser = sub_parser.add_parser("search", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     rmv_parser = sub_parser.add_parser("rmv", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
     # view cmd
     view_parser.add_argument("-r","--ref",
+                             type=str,
                              metavar="<reference>", 
-                             help="Show detail information of the reference."
+                             help="Show full detail of the information.",
                              )
-    view_parser.add_argument("-s","--search",
-                             metavar="<keyword>", 
-                             help="Query information based on provided keyword."
-                             )
-    view_parser.add_argument("-l","--limit",
+    view_parser.add_argument("--limit",
                              metavar="<number>",
                              type=int,
                              default=3,
-                             help="Number of information to display."
+                             help="Total number of information to be display."
+                             )
+    view_parser.add_argument("--offset",
+                             metavar="<number>",
+                             type=int,
+                             default=0,
+                             help="Starting number of information to be display."
+                             )
+    # search cmd
+    search_parser.add_argument("-s","--search",
+                             metavar="<keyword>", 
+                             help="Search information based on the provided keyword."
+                             )
+    search_parser.add_argument("-n","--name",
+                             metavar="<keyword>", 
+                             help="Search for data by name."
+                             )
+    search_parser.add_argument("-u","--username",
+                             metavar="<keyword>", 
+                             help="Search for data by username."
+                             )
+    search_parser.add_argument("-p","--password",
+                             metavar="<keyword>", 
+                             help="Search for data by password."
                              )
     
     args = parser.parse_args()
@@ -99,11 +121,10 @@ def add_data(database: Database):
     
 def view_data(database: Database, args: argparse.Namespace):
     if args.ref is None:
-        print("To show detail information of a reference. \nUse `mypass view -r <reference>`.")
-        database.get_all_info(limit=args.limit)
-    else:
+        print("To show full detail of the information. \nUse `mypass view -r <reference#>`.\n")
+        database.get_all_info(limit=args.limit, offset=args.offset)
+    elif args.ref is not None:
         database.get_info(ref_no=args.ref)
-
     database.close()
     sys.exit(0)
     
@@ -136,5 +157,5 @@ def init_logging():
 
 if __name__ == "__main__":
     init_logging()
-    args = tool_arguments()
+    args = arguments()
     main(args)
