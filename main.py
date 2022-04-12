@@ -10,7 +10,7 @@ from db_access import Database, InfoDataModel
 def tool_arguments():
     parser = argparse.ArgumentParser(
         description="Store your passwords in a fancy way.", 
-        prog="storepass",
+        prog="mypass",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
     sub_parser = parser.add_subparsers(
@@ -51,7 +51,7 @@ def parse_dict_to_json(data:dict):
     return json.dumps(data)
 
 def add_data(database: Database):
-    site = input("site: ")
+    name = input("name: ")
     username = input("username: ")
     password = input("password: ")
     
@@ -63,7 +63,7 @@ def add_data(database: Database):
 
     curr_date = datetime.now().strftime("%d:%m:%YT%H:%M:%S")
 
-    info_data = InfoDataModel(site, username, password, curr_date)
+    info_data = InfoDataModel(name, username, password, curr_date)
 
     database.insert_data(info_data)
     sys.exit(0)

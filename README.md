@@ -14,7 +14,7 @@ Store and read your password in a encrypted format through system commands
 4. Add __**\<project_path\>/pass-storage-py/**__ to your system __**PATH**__.
 5. Run the command below in the command prompt.
 
-        storepass
+        mypass
 ***
 
 ### Commands
