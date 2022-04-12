@@ -36,13 +36,13 @@ def arguments():
                              action='store_true'
                              )
     view_parser.add_argument("--limit",
-                             metavar="<number>",
+                             metavar="NUMBER",
                              type=int,
                              default=3,
                              help="Total number of data to be display."
                              )
     view_parser.add_argument("--offset",
-                             metavar="<number>",
+                             metavar="NUMBER",
                              type=int,
                              default=0,
                              help="Starting number of data to be display."
