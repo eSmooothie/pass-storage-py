@@ -2,17 +2,22 @@ import logging
 import os
 import sqlite3
 
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 class InfoDataModel:
-    def __init__(self, name, username, password, created_at):
+    def __init__(self, name, username, password, created_at, ref=None):
         self.name = name
         self.username = username
         self.password = password
         self.created_at = created_at
         self.others = {}
-        self.ref = hash(name + username + password + created_at)
+        if ref is None:
+            self.ref = hash((name, username, password, created_at))
+        else:
+            self.ref = ref
 
-    def add_other_fields(self, data: dict):
-        pass
+    def add_other_field(self, field, value):
+        self.others[field] = value
     
     def tuple_format(self) -> tuple:
         return (self.ref, self.name, self.username, self.password, self.created_at)
@@ -28,8 +33,8 @@ class Database:
     def __init__(self):
         logging.info("INIT DB")
         # check if db file exist
-        db_exist = os.path.isfile('password.db')
-        self.__db_conn = sqlite3.connect('password.db')
+        db_exist = os.path.isfile(ROOT_DIR + '/password.db')
+        self.__db_conn = sqlite3.connect(ROOT_DIR + '/password.db')
         self.__db_cursor = self.__db_conn.cursor()
 
         if not db_exist:
@@ -42,6 +47,46 @@ class Database:
     def db_cursor(self):
         return self.__db_cursor
 
+    def get_info(self, ref_no:int):
+        res = self.__db_cursor.execute(f'''
+            SELECT
+                *
+            FROM `info`
+            WHERE `ref`={ref_no}
+        ''')
+        res = res.fetchall()
+        for row in res:
+            ref, name, username, password, created_at = row
+            info_data = InfoDataModel(
+                ref=ref, 
+                name=name,
+                username=username,
+                password=password,
+                created_at=created_at
+                )
+            print(f"Reference {info_data.ref}")
+            print(f"\tname: {info_data.name}")
+            print(f"\tusername: {info_data.username}")
+            print(f"\tpassword: {info_data.password}")
+            print(f"\tcreated at: {info_data.created_at}")
+
+        other = self.__db_cursor.execute(f'''
+            SELECT
+                *
+            FROM `other_info`
+            WHERE `ref`={ref_no}
+        ''')
+        print("Other fields:")
+        o_fields = other.fetchall()
+        logging.debug("Other field: {0} Len: {1}".format(o_fields, len(o_fields)))
+        if len(o_fields) == 0:
+            print("\tNone")
+        else:
+            for row in o_fields:
+                ref, field, value = row
+                print(f"\t{field}: {value}")
+        other.close()
+
     def get_all_info(self, limit:int = 5):
         res = self.__db_cursor.execute(f'''SELECT 
             `ref` AS `reference`,
@@ -51,14 +96,37 @@ class Database:
             `created_at` AS `created_at`
             FROM `info` LIMIT {limit}
             ''')
+        res = res.fetchall()
 
-        print(res.fetchall())
+        for row in res:
+            ref, name, username, password, created_at = row
+            info_data = InfoDataModel(
+                ref=ref, 
+                name=name,
+                username=username,
+                password=password,
+                created_at=created_at
+                )
+            print(f"Reference {info_data.ref} - {info_data.created_at}")
+            print(f"\tname: {info_data.name}")
+            print(f"\tusername: {info_data.username}")
+            print(f"\tpassword: {info_data.password}")
+            print(f"\tcreated at: {info_data.created_at}\n")
+        
 
-    def insert_data(self, data : InfoDataModel):
+    def insert_info_data(self, data : InfoDataModel):
         insert_sql = 'INSERT INTO info VALUES (?, ?, ?, ?, ?)'
         self.__db_cursor.execute(insert_sql, data.tuple_format())
+        logging.info(f"INSERTING {data}")
+
+    def insert_other_info_data(self, data: tuple):
+        insert_sql = 'INSERT INTO other_info VALUES (?, ?, ?)'
+        self.__db_cursor.execute(insert_sql, data)
+        logging.info(f"INSERTING {data}")
+
+    def commit(self):
         self.__db_conn.commit()
-        logging.info(f"INSERT {data}")
+        logging.info(f"COMMIT CHANGES TO DB.")
 
     def close(self):
         self.__db_conn.close()

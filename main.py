@@ -7,6 +7,8 @@ import base64
 from datetime import datetime
 from db_access import Database, InfoDataModel
 
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def tool_arguments():
     parser = argparse.ArgumentParser(
         description="Store your passwords in a fancy way.", 
@@ -23,14 +25,18 @@ def tool_arguments():
     rmv_parser = sub_parser.add_parser("rmv", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
     # view cmd
-    view_parser.add_argument("-s","--search", 
+    view_parser.add_argument("-r","--ref",
+                             metavar="<reference>", 
+                             help="Show detail information of the reference."
+                             )
+    view_parser.add_argument("-s","--search",
                              metavar="<keyword>", 
                              help="Query information based on provided keyword."
                              )
     view_parser.add_argument("-l","--limit",
                              metavar="<number>",
                              type=int,
-                             default=5,
+                             default=3,
                              help="Number of information to display."
                              )
     
@@ -57,19 +63,49 @@ def add_data(database: Database):
     
     others = input("do you want to input other fields? (y/n) ")
     
-    if others.lower() == "y":
-        # TODO: add additional information to be inputted.
-        pass
-
     curr_date = datetime.now().strftime("%d:%m:%YT%H:%M:%S")
 
-    info_data = InfoDataModel(name, username, password, curr_date)
+    info_data = InfoDataModel(
+        name=name, 
+        username=username, 
+        password=password, 
+        created_at=curr_date
+        )
 
-    database.insert_data(info_data)
+    
+    if others.lower() == "y":
+        other_fields = {}
+
+        print("Insert new fields.")
+        while True:
+            field = input("field: ")
+            value = input(f"value ({field}): ")
+            print()
+            other_fields[field] = value
+            is_done = input("Add another field? (y/n) ")
+
+            if is_done.lower() != 'y':
+                break
+            
+            print()
+        logging.debug("Other fields {0}".format(other_fields))
+        for field, value in other_fields.items():
+            database.insert_other_info_data((info_data.ref, field, value))
+
+    database.insert_info_data(info_data)
+
+    database.commit()
+    database.close()
     sys.exit(0)
     
 def view_data(database: Database, args: argparse.Namespace):
-    database.get_all_info(limit=args.limit)
+    if args.ref is None:
+        print("To show detail information of a reference. \nUse `mypass view -r <reference>`.")
+        database.get_all_info(limit=args.limit)
+    else:
+        database.get_info(ref_no=args.ref)
+
+    database.close()
     sys.exit(0)
     
 def main(args : argparse.Namespace):
@@ -78,14 +114,18 @@ def main(args : argparse.Namespace):
     logging.debug(f"Arguments: {args}")
 
     if args.cmd == "add":
-        add_data(db)
+        try:
+            add_data(db)
+        except KeyboardInterrupt:
+            print("\nProcess interrupted.")
+            sys.exit(1)
     elif args.cmd == "view":
         view_data(db, args)
     elif args.cmd == "rmv":
         print("remove data")
 
 def init_logging():
-    log_dir = os.getcwd() + "/logs/"
+    log_dir = ROOT_DIR + "/logs/"
     log_filename = datetime.now().strftime("%Y_%m_%d") + ".log"
     logging.basicConfig(
         filename=log_dir + log_filename,
@@ -94,7 +134,6 @@ def init_logging():
         format='%(asctime)s : [%(levelname)s] > %(message)s',
         datefmt='%I:%M:%S %p'
     )
-
 
 if __name__ == "__main__":
     init_logging()
