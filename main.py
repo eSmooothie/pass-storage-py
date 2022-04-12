@@ -2,7 +2,6 @@ import argparse
 import logging
 import os
 import sys
-import json
 from datetime import datetime
 from db_access import Database, InfoDataModel
 
@@ -23,31 +22,32 @@ def arguments():
     add_parser = sub_parser.add_parser("add", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     view_parser = sub_parser.add_parser("view", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     search_parser = sub_parser.add_parser("search", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    rmv_parser = sub_parser.add_parser("rmv", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    rmv_parser = sub_parser.add_parser("rm", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
     # view cmd
-    view_parser.add_argument("-r","--ref",
+    view_grp_parser = view_parser.add_mutually_exclusive_group(required=True)
+    view_grp_parser.add_argument("-r","--ref",
                              type=str,
                              metavar="<reference>", 
-                             help="Show full detail of the information.",
+                             help="Show full detail of the data.",
+                             )
+    view_grp_parser.add_argument("-a","--all",
+                             help="Show brief detail of all data.",
+                             action='store_true'
                              )
     view_parser.add_argument("--limit",
                              metavar="<number>",
                              type=int,
                              default=3,
-                             help="Total number of information to be display."
+                             help="Total number of data to be display."
                              )
     view_parser.add_argument("--offset",
                              metavar="<number>",
                              type=int,
                              default=0,
-                             help="Starting number of information to be display."
+                             help="Starting number of data to be display."
                              )
     # search cmd
-    search_parser.add_argument("-s","--search",
-                             metavar="<keyword>", 
-                             help="Search information based on the provided keyword."
-                             )
     search_parser.add_argument("-n","--name",
                              metavar="<keyword>", 
                              help="Search for data by name."
@@ -60,6 +60,16 @@ def arguments():
                              metavar="<keyword>", 
                              help="Search for data by password."
                              )
+    # remove cmd
+    rmv_grp_parser = rmv_parser.add_mutually_exclusive_group(required=True)
+    rmv_grp_parser.add_argument("-r","--ref",
+                            metavar="<reference>",
+                            help="Remove the data from database."
+                            )
+    rmv_grp_parser.add_argument("-a","--all",
+                            help="Clear all stored data",
+                            action='store_true'
+                            )
     
     args = parser.parse_args()
    
@@ -73,9 +83,6 @@ def arguments():
         sys.exit()
         
     return args
-
-def parse_dict_to_json(data:dict):
-    return json.dumps(data)
 
 def add_data(database: Database):
     name = input("name: ")
@@ -116,15 +123,31 @@ def add_data(database: Database):
     database.insert_info_data(info_data)
 
     database.commit()
-    database.close()
     sys.exit(0)
     
 def view_data(database: Database, args: argparse.Namespace):
     if args.ref is None:
-        print("To show full detail of the information. \nUse `mypass view -r <reference#>`.\n")
         database.get_all_info(limit=args.limit, offset=args.offset)
+        print("\nTo show full detail of the information. \nUse `mypass view -r <reference#>`.\n")
     elif args.ref is not None:
         database.get_info(ref_no=args.ref)
+    sys.exit(0)
+
+def rmv_data(database: Database, args: argparse.Namespace):
+    if args.ref is not None and not args.all :
+        database.remove_data(args.ref)
+        database.commit()
+        print(f"Reference {args.ref} remove successfully.")
+    elif args.all:
+        database.remove_all()
+        database.commit()
+        print("Database cleared.")
+        
+    sys.exit(0)
+    
+def search_data(database: Database, args: argparse.Namespace):
+    database.filter_info(name=args.name, username=args.username, password=args.password)
+    print("\nTo view full detail of the information.\nUse `mypass view -r/--ref <reference>`.")
     database.close()
     sys.exit(0)
     
@@ -141,8 +164,10 @@ def main(args : argparse.Namespace):
             sys.exit(1)
     elif args.cmd == "view":
         view_data(db, args)
-    elif args.cmd == "rmv":
-        print("remove data")
+    elif args.cmd == "search":
+        search_data(db, args)
+    elif args.cmd == "rm":
+        rmv_data(db, args)
 
 def init_logging():
     log_dir = ROOT_DIR + "/logs/"
