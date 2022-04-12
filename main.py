@@ -103,7 +103,7 @@ def arguments():
 
 def add_data(database: Database):
     name = input("name: ")
-    username = input("username: ")
+    username = input("username/email: ")
     password = input("password: ")
     
     others = input("do you want to input other fields? (y/n) ")
