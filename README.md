@@ -1,8 +1,8 @@
 # PASSWORD STORAGE
 
-Store your passwords in a fancy way.
+Store and access your passwords in a fancy way.
 
-The program will store your password information in your device and you can access it through system command.
+The program will store your password information in your device and you can access it through a system command.
 
 ### Windows Installation
 ***
