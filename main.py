@@ -1,8 +1,11 @@
 import argparse
+import logging
 import os
 import sys
 import json
 import base64
+from datetime import datetime
+from db_access import Database, InfoDataModel
 
 def tool_arguments():
     parser = argparse.ArgumentParser(
@@ -37,25 +40,17 @@ def tool_arguments():
     if len(sys.argv) == 1 and args.cmd is None:
         parser.print_help(sys.stderr)
         sys.exit()
-    
-    if len(sys.argv) == 2 and args.cmd == "view":
-        view_parser.print_help()
-        sys.exit()
-        
+            
     if len(sys.argv) == 2 and args.cmd == "rmv":
         rmv_parser.print_help()
         sys.exit()
         
     return args
 
-def open_storage(filemode: str):
-    filename = 'info.pass'
-    file = open(filename, filemode)
-    return file
-    
-def add_data():
-    password_file = open_storage('a+')
-    
+def parse_dict_to_json(data:dict):
+    return json.dumps(data)
+
+def add_data(database: Database):
     site = input("site: ")
     username = input("username: ")
     password = input("password: ")
@@ -65,28 +60,43 @@ def add_data():
     if others.lower() == "y":
         # TODO: add additional information to be inputted.
         pass
+
+    curr_date = datetime.now().strftime("%d:%m:%YT%H:%M:%S")
+
+    info_data = InfoDataModel(site, username, password, curr_date)
+
+    database.insert_data(info_data)
+    sys.exit(0)
     
-    dict_data = {
-        'site' : site,
-        'username' : username,
-        'password' : password,
-        'others' : {}
-    }
-    
-    json_data = json.dumps(dict_data)
-    password_file.write(json_data + "\n")
-    password_file.close()
-    
+def view_data(database: Database, args: argparse.Namespace):
+    database.get_all_info(limit=args.limit)
+    sys.exit(0)
     
 def main(args : argparse.Namespace):
+    db = Database()
     
+    logging.debug(f"Arguments: {args}")
+
     if args.cmd == "add":
-        add_data()
+        add_data(db)
     elif args.cmd == "view":
-        print("view data")
+        view_data(db, args)
     elif args.cmd == "rmv":
         print("remove data")
 
+def init_logging():
+    log_dir = os.getcwd() + "/logs/"
+    log_filename = datetime.now().strftime("%Y_%m_%d") + ".log"
+    logging.basicConfig(
+        filename=log_dir + log_filename,
+        filemode='a',
+        level=logging.DEBUG,
+        format='%(asctime)s : [%(levelname)s] > %(message)s',
+        datefmt='%I:%M:%S %p'
+    )
+
+
 if __name__ == "__main__":
+    init_logging()
     args = tool_arguments()
     main(args)
