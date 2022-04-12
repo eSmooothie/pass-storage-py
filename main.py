@@ -3,7 +3,6 @@ import logging
 import os
 import sys
 import json
-import base64
 from datetime import datetime
 from db_access import Database, InfoDataModel
 
