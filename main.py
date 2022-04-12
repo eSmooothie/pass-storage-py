@@ -48,6 +48,7 @@ def arguments():
                              help="Starting number of data to be display."
                              )
     # search cmd
+    
     search_parser.add_argument("-n","--name",
                              metavar="<keyword>", 
                              help="Search for data by name."
@@ -59,6 +60,18 @@ def arguments():
     search_parser.add_argument("-p","--password",
                              metavar="<keyword>", 
                              help="Search for data by password."
+                             )
+    search_parser.add_argument("--limit",
+                             metavar="<number>",
+                             type=int,
+                             default=3,
+                             help="Total number of data to be display."
+                             )
+    search_parser.add_argument("--offset",
+                             metavar="<number>",
+                             type=int,
+                             default=0,
+                             help="Starting number of data to be display."
                              )
     # remove cmd
     rmv_grp_parser = rmv_parser.add_mutually_exclusive_group(required=True)
@@ -79,7 +92,11 @@ def arguments():
         sys.exit()
             
     if len(sys.argv) == 2 and args.cmd == "rmv":
-        rmv_parser.print_help()
+        rmv_parser.print_help(sys.stderr)
+        sys.exit()
+    
+    if args.cmd == "search" and not (args.name or args.username or args.password):
+        search_parser.error("one of the argument is required -n/--name, -u/--username, or -p/-password")
         sys.exit()
         
     return args
