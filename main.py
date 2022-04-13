@@ -28,7 +28,7 @@ def arguments():
     view_grp_parser = view_parser.add_mutually_exclusive_group(required=True)
     view_grp_parser.add_argument("-r","--ref",
                              type=str,
-                             metavar="<reference>", 
+                             metavar="REFERENCE", 
                              help="Show full detail of the data.",
                              )
     view_grp_parser.add_argument("-a","--all",
@@ -50,25 +50,25 @@ def arguments():
     # search cmd
     
     search_parser.add_argument("-n","--name",
-                             metavar="<keyword>", 
+                             metavar="KEYWORD", 
                              help="Search for data by name."
                              )
     search_parser.add_argument("-u","--username",
-                             metavar="<keyword>", 
+                             metavar="KEYWORD", 
                              help="Search for data by username."
                              )
     search_parser.add_argument("-p","--password",
-                             metavar="<keyword>", 
+                             metavar="KEYWORD", 
                              help="Search for data by password."
                              )
     search_parser.add_argument("--limit",
-                             metavar="<number>",
+                             metavar="NUMBER",
                              type=int,
                              default=3,
                              help="Total number of data to be display."
                              )
     search_parser.add_argument("--offset",
-                             metavar="<number>",
+                             metavar="NUMBER",
                              type=int,
                              default=0,
                              help="Starting number of data to be display."
@@ -76,7 +76,7 @@ def arguments():
     # remove cmd
     rmv_grp_parser = rmv_parser.add_mutually_exclusive_group(required=True)
     rmv_grp_parser.add_argument("-r","--ref",
-                            metavar="<reference>",
+                            metavar="REFERENCE",
                             help="Remove the data from database."
                             )
     rmv_grp_parser.add_argument("-a","--all",
