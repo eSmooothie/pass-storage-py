@@ -1,4 +1,4 @@
-*.cred
+*.pem
 *.db
 logs/*.log
 __pycache__/

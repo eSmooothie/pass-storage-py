@@ -3,6 +3,8 @@ import os
 import sqlite3
 import sys
 
+from encryption import Cryptography
+
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class InfoDataModel:
@@ -49,7 +51,7 @@ class Database:
     def db_cursor(self):
         return self.__db_cursor
 
-    def get_info(self, ref_no:str):
+    def get_info(self, ref_no:str, show_pass:bool=False):
         res = self.__db_cursor.execute(f'''
             SELECT
                 *
@@ -71,10 +73,15 @@ class Database:
                 password=password,
                 created_at=created_at
                 )
+            
+            cryptography = Cryptography()
+            
+            password = cryptography.decrypt(password) if show_pass else "<--encrypted-->"
+            
             print(f"Reference {info_data.ref}")
             print(f"\tname: {info_data.name}")
             print(f"\tusername: {info_data.username}")
-            print(f"\tpassword: {info_data.password}")
+            print(f"\tpassword: {password}")
             print(f"\tcreated at: {info_data.created_at}")
 
         other = self.__db_cursor.execute(f'''
@@ -123,7 +130,7 @@ class Database:
             print(f"Reference {info_data.ref} ({info_data.created_at})")
             print(f"\tname: {info_data.name}")
             print(f"\tusername: {info_data.username}")
-            print(f"\tpassword: {info_data.password}\n")
+            print(f"\tpassword: <--encrypted-->\n")
             
     def filter_info(self, **kwargs):
         logging.debug(f"at filter_info(). kwargs={kwargs}")
@@ -165,7 +172,7 @@ class Database:
             print(f"Reference {info_data.ref} ({info_data.created_at})")
             print(f"\tname: {info_data.name}")
             print(f"\tusername: {info_data.username}")
-            print(f"\tpassword: {info_data.password}\n")
+            print(f"\tpassword: <--encrypted-->\n")
     
     def remove_data(self, ref_no:str):
         del_sql = f'DELETE FROM `info` WHERE `ref` LIKE {ref_no}'

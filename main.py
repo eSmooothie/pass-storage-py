@@ -4,6 +4,7 @@ import os
 import sys
 from datetime import datetime
 from db_access import Database, InfoDataModel
+from encryption import Cryptography
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -46,6 +47,10 @@ def arguments():
                              type=int,
                              default=0,
                              help="Starting number of data to be display."
+                             )
+    view_parser.add_argument("--show",
+                             help="Decrypt password.",
+                             action='store_true'
                              )
     # search cmd
     
@@ -110,10 +115,14 @@ def add_data(database: Database):
     
     curr_date = datetime.now().strftime("%d:%m:%YT%H:%M:%S")
 
+    cryptography = Cryptography()
+    
+    encrypted_password = cryptography.encrypt(password)
+    
     info_data = InfoDataModel(
         name=name, 
         username=username, 
-        password=password, 
+        password=encrypted_password, 
         created_at=curr_date
         )
 
@@ -147,7 +156,12 @@ def add_data(database: Database):
 def view_data(database: Database, args: argparse.Namespace):
     if args.ref is None:
         database.get_all_info(limit=args.limit, offset=args.offset)
-        print("\nTo show full detail of the information. \nUse `mypass view -r <reference#>`.\n")
+        print("""To show full detail of the information. 
+              Use `mypass view -r/--ref <reference>` or 
+              `mypass view -r/--ref <reference> --show` to show password."""
+              )
+    elif args.ref is not None and args.show:
+        database.get_info(ref_no=args.ref, show_pass=args.show)
     elif args.ref is not None:
         database.get_info(ref_no=args.ref)
     sys.exit(0)
@@ -166,7 +180,8 @@ def rmv_data(database: Database, args: argparse.Namespace):
     
 def search_data(database: Database, args: argparse.Namespace):
     database.filter_info(name=args.name, username=args.username, password=args.password)
-    print("\nTo view full detail of the information.\nUse `mypass view -r/--ref <reference>`.")
+    print("""To show full detail of the information.\nUse `mypass view -r/--ref <reference>` or \n`mypass view -r/--ref <reference> --show` to show password."""
+        )
     database.close()
     sys.exit(0)
     
