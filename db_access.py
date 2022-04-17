@@ -34,7 +34,6 @@ class InfoDataModel:
 class Database:
 
     def __init__(self):
-        logging.debug("INIT DB")
         # check if db file exist
         db_exist = os.path.isfile(ROOT_DIR + '/password.db')
         self.__db_conn = sqlite3.connect(ROOT_DIR + '/password.db')
