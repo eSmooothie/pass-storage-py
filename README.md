@@ -46,6 +46,10 @@ The program will store your password information in your device and you can acce
                         <td>Display full detail of the data</td>
                 </tr>
                 <tr>
+                        <td><code>mypass view -r/ref [reference] --show</code></td>
+                        <td>Display full detail of the data and decrypt password</td>
+                </tr>
+                <tr>
                         <td><code>mypass view -a --limit NUMBER</code></td>
                         <td>Total number of data to be display. (default: 3)</td>
                 </tr>
