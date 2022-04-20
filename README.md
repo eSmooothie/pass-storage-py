@@ -6,7 +6,7 @@ The program will store your password information in your device and you can acce
 
 ### Windows Installation
 ***
-1. Clone the repository.
+1. Clone or download the repository.
 
         git clone https://github.com/eSmooothie/pass-storage-py.git
 
