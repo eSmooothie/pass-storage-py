@@ -41,11 +41,11 @@ The program will store your password information in your device and you can acce
                         <td>Display all stored data</td>
                 </tr>
                 <tr>
-                        <td><code>mypass view -r/ref [reference]</code></td>
+                        <td><code>mypass view -r/ref REFERENCE</code></td>
                         <td>Display full detail of the data</td>
                 </tr>
                 <tr>
-                        <td><code>mypass view -r/ref [reference] --show</code></td>
+                        <td><code>mypass view -r/ref REFERENCE --show</code></td>
                         <td>Display full detail of the data and decrypt password</td>
                 </tr>
                 <tr>
@@ -94,7 +94,7 @@ The program will store your password information in your device and you can acce
                 </tr>
                 <tr>
                         <td><code>mypass rmv -r/--ref REFERENCE</code></td>
-                        <td>Remove REFERENCE.</td>
+                        <td>Remove data based on REFERENCE ID.</td>
                 </tr>
                 <tr>
                         <td><code>mypass rmv -a/--all</code></td>
