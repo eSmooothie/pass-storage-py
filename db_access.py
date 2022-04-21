@@ -75,6 +75,7 @@ class Database:
             
             cryptography = Cryptography()
             
+            logging.debug(info_data)
             password = cryptography.decrypt(password) if show_pass else "<--encrypted-->"
             
             print(f"Reference {info_data.ref}")

@@ -209,7 +209,7 @@ def init_logging():
     logging.basicConfig(
         filename=log_dir + log_filename,
         filemode='a',
-        level=logging.DEBUG,
+        level=logging.CRITICAL,
         format='%(asctime)s : [%(levelname)s] > %(message)s',
         datefmt='%I:%M:%S %p'
     )
